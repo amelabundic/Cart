@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        
+        table{
+            width: 500px;
+        }
+        table,td,th{
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+        td,th{
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Trenutni sadrzaj vase korpe je:</h2>
+    <div id="div1"></div>
+    <br>
+    <span id="spanVrijednost"></span>
+    <br>
+
+    <a href="/korpa.html">Promijeni korpu</a>
+
+    <script>
+        var div1 = document.getElementById("div1");
+        var spanVrijednost = document.getElementById("spanVrijednost");
+        
+        var korpa = null;
+
+        document.body.onload = function () {
+          if (sessionStorage.Korpa !=null) {
+              korpa = JSON.parse(sessionStorage.Korpa);
+              StampajKorpu();
+          }  
+        };
+
+        function StampajKorpu() {
+            if (korpa.length > 0) {
+
+                var tabela = "<table>";
+
+                for (var i = 0; i < korpa.length; i++) {
+                 tabela +=`<tr>
+                 <td>${korpa[i].Proizvod.Naziv}</td>
+                 <td>${korpa[i].Proizvod.Cijena}</td>
+                 <td>${korpa[i].Kolicina}</td>
+                 </tr>`;
+                    
+                }
+                tabela +="</table>";
+                div1.innerHTML = tabela;
+                spanVrijednost.innerHTML = "Vrijednost korpe:" + VrijednostKorpe();
+            }
+        }
+        function VrijednostKorpe() {
+            var suma = 0;
+
+            for (var i = 0; i < korpa.length; i++) {
+                suma += korpa[i].Proizvod.Cijena * korpa[i].Kolicina;
+                
+            }
+            return suma;
+        }
+    </script>
+</body>
+</html>

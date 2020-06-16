@@ -1,0 +1,8 @@
+[
+    {"ProizvodId":1,"Naziv":"Jogurt Milkos 250gr", "Cijena":1.59},
+    {"ProizvodId":2,"Naziv":"Cokolada Dorina 90gr", "Cijena":1.80},
+    {"ProizvodId":3,"Naziv":"Pasteta Argeta 100gr", "Cijena":1.99},
+    {"ProizvodId":4,"Naziv":"Salama Ptuj 250gr", "Cijena":2.00},
+    {"ProizvodId":5,"Naziv":"Domaci sir 500gr", "Cijena":4.00},
+    {"ProizvodId":6,"Naziv":"Ulje Suncokret 1l", "Cijena":2.25}
+]

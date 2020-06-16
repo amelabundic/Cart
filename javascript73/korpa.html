@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+       
+       
+        table {
+            width: 500px;
+            border: 1px solid black;
+            
+        }
+        table,td,th{
+            padding: 5px;
+        }
+        th{
+            background-color: cadetblue;
+        }
+    </style>
+</head>
+<body>
+    
+    <form action="" method="get">
+        <label for="Select1">Odaberi proizvod:</label><br>
+        <select id="Select1" size="4" onchange="PrikaziCijenu()">
+            
+        </select>
+        <br><br>
+        <span id="spanCijena"></span>
+        <br><br>
+
+        <label for="TextKolicina">Kolicina:</label>
+        <input type="text" id="TextKolicina" value="1">
+
+        <input id="Button1" type="button" value="Dodaj u korpu" onclick="Ubaci()">
+        <br><br>
+
+        <div id="div1"></div>
+
+        <br><br>
+
+        <span id="spanVrijednost"></span>
+
+        <br><br>
+        
+        <input id="Button2" type="button" value="Kupi" onclick="Kupi()">
+    </form>
+    
+    <script>
+        function Proizvod(ProizvodId,Naziv,Cijena) {
+            this.ProizvodId = ProizvodId;
+            this.Naziv = Naziv;
+            this.Cijena = Cijena;
+        }
+
+        function Stavka(Proizvod,Kolicina) {
+            this.Proizvod = Proizvod;
+            this.Kolicina = Kolicina;
+
+        }
+        var Select1 = document.getElementById("Select1");
+        var korpa;
+
+        function SacuvajProizvode(callback) {
+            
+
+            var zahtjev = new XMLHttpRequest();
+            zahtjev.open("GET","/Podaci/Proizvodi.json",true);
+            zahtjev.send();
+
+            zahtjev.onreadystatechange = function () {
+                if (zahtjev.readyState == 4 && zahtjev.status == 200) {
+                    sessionStorage.Proizvodi = zahtjev.responseText;
+
+                    callback();
+        //callback se poziva kad dobijemo odgovor od servera            
+                }
+            };
+        }
+
+        function PrikaziProizvode() {
+            if (sessionStorage.Proizvodi != null) {
+                var proizvodi = JSON.parse(sessionStorage.Proizvodi);
+
+                var s = "";
+
+                for (var i = 0; i < proizvodi.length; i++) {
+                 s +=`<option value="${proizvodi[i].ProizvodId}"> ${proizvodi[i].Naziv}</option>`;
+                    
+                }
+                Select1.innerHTML = s;
+            }
+        }
+
+        document.body.onload = function () {
+  
+          if (sessionStorage.Proizvodi == null) {
+            SacuvajProizvode(PrikaziProizvode); 
+          }
+          else
+             {
+               PrikaziProizvode();
+               SacuvajProizvode(PrikaziProizvode);
+             }
+             if (sessionStorage.Korpa !=null) {
+                 korpa = JSON.parse(sessionStorage.Korpa);
+                 //StampajKorpu();
+             } else {
+                 korpa = new Array();
+             }
+          
+        };
+
+        function VratiCijenu(id) {
+            var proizvodi = JSON.parse(sessionStorage.Proizvodi);
+            for (let i = 0; i < proizvodi.length; i++) {
+             if (proizvodi[i].ProizvodId == id) {
+                 return proizvodi[i].Cijena;
+             }
+                
+            }
+        }
+        function PrikaziCijenu() {
+            var spanCijena = document.getElementById("spanCijena");
+            var id = Select1.value;
+            spanCijena.innerHTML = "Cijena:" + VratiCijenu(id);
+        }
+
+        function VratiIndex(id) {
+            for (let i = 0; i < korpa.length; i++) {
+                if (korpa[i].Proizvod.ProizvodId == id) {
+                return i;
+            }
+                return -1;
+            }
+            
+        }
+
+        function DodajUKorpu(stavka) {
+            var id = stavka.Proizvod.ProizvodId;
+            var indeks = VratiIndex(id);
+
+            if (indeks >-1) {
+                var staraKolicina = parseInt(korpa[indeks].Kolicina);
+                korpa[indeks].Kolicina = staraKolicina + parseInt(stavka.Kolicina);
+            } else {
+                korpa.push(stavka);
+            }
+        }
+        function VrijednostKorpe() {
+            var suma = 0;
+            for (let i = 0; i < korpa.length; i++) {
+                suma += korpa[i].Proizvod.Cijena * korpa[i].Kolicina;
+                
+            }
+            return suma;
+        }
+        function StampajKorpu() {
+
+            var spanVrijednost = document.getElementById("spanVrijednost");
+            if (korpa.length > 0) {
+                var tabela = "<table>";
+
+                for (let i = 0; i < korpa.length; i++) {
+                    tabela +=`<tr>
+                    <td>${korpa[i].Proizvod.Naziv}</td>
+                    <td>${korpa[i].Proizvod.Cijena}</td>
+                    <td>${korpa[i].Kolicina}</td>
+                    <td><input type="button" data-id="${korpa[i].Proizvod.ProizvodId}" value ="Promijeni" onclick="Promijeni(event)"></td>
+                    <td><input type="button" data-id="${korpa[i].Proizvod.ProizvodId}" value ="Obrisi" onclick="Obrisi(event)"></td>
+                    </tr>`;
+                    
+                }
+                tabela +="</table>";
+
+                div1.innerHTML = tabela;
+                spanVrijednost.innerHTML = "Vrijednost korpe:" + VrijednostKorpe();
+            }
+        }
+        function Ubaci() {
+            var id = Select1.value;
+            var TextKolicina = document.getElementById("TextKolicina");
+
+            if (Select1.selectedIndex < 0) {
+                alert("Odaberite proizvod");
+                return;
+            }
+            var kolicina = parseInt(TextKolicina.value);
+
+            if (isNaN(kolicina) || kolicina == "") {
+                alert("Kolicina mora biti cio broj");
+                return;
+            }
+            var id = Select1.value;
+            var naziv = Select1.options[Select1.selectedIndex].text;
+            var cijena = VratiCijenu(id);
+            var proizvod = new Proizvod(id,naziv,cijena);
+            var stavka = new Stavka(proizvod,kolicina);
+
+            DodajUKorpu(stavka);
+            StampajKorpu();
+        }
+        function Promijeni(event) {
+            var id = event.target.getAttribute("data-id");
+            var index = VratiIndex(id);
+
+            var tekucaKolicina = korpa[index].Kolicina;
+            var nk = prompt("Nova kolicina?",tekucaKolicina);
+
+            if (nk == null) {
+                return;
+            }
+            var novaKolicina = parseInt(nk);
+
+            if (isNaN(novaKolicina)) {
+                alert("Morate unijeti broj");
+                return;
+            }
+            korpa[index].Kolicina = parseInt(novaKolicina);
+            StampajKorpu();
+        }
+
+        function Obrisi(event) {
+            var id = event.target.getAttribute("data-id");
+            var index = VratiIndex(id);
+
+            korpa.splice(index,1);
+
+            if (korpa.length > 0) {
+                StampajKorpu();
+            } else {
+                div1.innerHTML ="";
+                spanVrijednost.innerHTML = "";
+            }
+        }
+        function Kupi() {
+            if (korpa.length > 0) {
+                sessionStorage.Korpa = JSON.stringify(korpa);
+                location.href = "/PregledKorpe.html";
+            }
+        }
+    </script>
+</body>
+</html>
