@@ -9,15 +9,14 @@
        
         table {
             width: 500px;
-            border: 1px solid black;
+            border: 2px solid black;
             
         }
         table,td,th{
             padding: 5px;
+            border-collapse: collapse;
         }
-        th{
-            background-color: cadetblue;
-        }
+       
     </style>
 </head>
 <body>
@@ -65,9 +64,8 @@
 
         function SacuvajProizvode(callback) {
             
-
-            var zahtjev = new XMLHttpRequest();
-            zahtjev.open("GET","/Podaci/Proizvodi.json",true);
+         var zahtjev = new XMLHttpRequest();
+            zahtjev.open("GET","Podaci/Proizvodi.json",true);
             zahtjev.send();
 
             zahtjev.onreadystatechange = function () {
@@ -75,7 +73,7 @@
                     sessionStorage.Proizvodi = zahtjev.responseText;
 
                     callback();
-        //callback se poziva kad dobijemo odgovor od servera            
+                  
                 }
             };
         }
@@ -238,7 +236,7 @@
         function Kupi() {
             if (korpa.length > 0) {
                 sessionStorage.Korpa = JSON.stringify(korpa);
-                location.href = "/PregledKorpe.html";
+                location.href = "pregledKorpe.html";
             }
         }
     </script>
